@@ -23,6 +23,8 @@
 
 @implementation LibraryAPI
 
+#pragma mark - Singleton
+
 +(LibraryAPI*)sharedInstance {
  
     static LibraryAPI *_sharedInstance = nil;
@@ -35,6 +37,8 @@
     return _sharedInstance;
     
 }
+
+#pragma mark - Lifecycle
 
 -(id)init {
  
@@ -54,7 +58,15 @@
     
 }
 
--(NSArray*)getAlbums {
+-(void)dealloc {
+    
+    [[NSNotificationCenter defaultCenter] removeObserver:self];
+    
+}
+
+#pragma mark - Public methods
+
+-(NSArray *)getAlbums {
     
     return [persistencyManager getAlbums];
     
@@ -78,33 +90,35 @@
 
 }
 
-- (void)downloadImage:(NSNotification*)notification
-{
-    // 1
+-(void)saveAlbums {
+    
+    [persistencyManager saveAlbums];
+    
+}
+
+#pragma mark - Notification methods
+
+-(void)downloadImage:(NSNotification*)notification {
+    
     UIImageView *imageView = notification.userInfo[@"imageView"];
     NSString *coverUrl = notification.userInfo[@"coverUrl"];
     
-    // 2
     imageView.image = [persistencyManager getImage:[coverUrl lastPathComponent]];
     
-    if (imageView.image == nil)
-    {
-        // 3
+    if ( imageView.image == nil ) {
+        
         dispatch_async(dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0), ^{
+            
             UIImage *image = [httpClient downloadImage:coverUrl];
             
-            // 4
             dispatch_sync(dispatch_get_main_queue(), ^{
                 imageView.image = image;
                 [persistencyManager saveImage:image filename:[coverUrl lastPathComponent]];
             });
+            
         });
-    }    
-}
-
--(void)dealloc {
-    
-    [[NSNotificationCenter defaultCenter] removeObserver:self];
+        
+    }
     
 }
 

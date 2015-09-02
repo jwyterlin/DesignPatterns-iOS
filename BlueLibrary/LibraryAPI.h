@@ -12,10 +12,11 @@
 
 @interface LibraryAPI : NSObject
 
-+(LibraryAPI*)sharedInstance;
++(LibraryAPI *)sharedInstance;
 
-- (NSArray*)getAlbums;
-- (void)addAlbum:(Album*)album atIndex:(int)index;
-- (void)deleteAlbumAtIndex:(int)index;
+-(NSArray *)getAlbums;
+-(void)addAlbum:(Album*)album atIndex:(int)index;
+-(void)deleteAlbumAtIndex:(int)index;
+-(void)saveAlbums;
 
 @end
